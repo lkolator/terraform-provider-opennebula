@@ -5,7 +5,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/OpenNebula/one/src/oca/go/src/goca/errors"
 	"github.com/OpenNebula/one/src/oca/go/src/goca/schemas/shared"
+
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func inArray(val string, array []string) (index int) {
@@ -77,4 +80,52 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.IsNil()
 	}
 	return false
+}
+
+// NoExists indicate if an entity exists in checking the error code returned from an Info call
+func NoExists(err error) bool {
+
+	respErr, ok := err.(*errors.ResponseError)
+
+	// expected case, the entity does not exists so we doesn't return an error
+	if ok && respErr.Code == errors.OneNoExistsError {
+		return true
+	}
+
+	return false
+}
+
+// returns the diff of two lists of schemas, making diff on attrNames only
+func diffListConfig(refVecs, vecs []interface{}, s *schema.Resource, attrNames ...string) ([]interface{}, []interface{}) {
+
+	refSet := schema.NewSet(schema.HashResource(s), []interface{}{})
+	for _, iface := range refVecs {
+		sc := iface.(map[string]interface{})
+
+		// keep only attrNames values
+		filteredSc := make(map[string]interface{})
+		for _, name := range attrNames {
+			filteredSc[name] = sc[name]
+		}
+
+		refSet.Add(filteredSc)
+	}
+
+	set := schema.NewSet(schema.HashResource(s), []interface{}{})
+	for _, iface := range vecs {
+		sc := iface.(map[string]interface{})
+
+		// keep only attrNames values
+		filteredSc := make(map[string]interface{})
+		for _, name := range attrNames {
+			filteredSc[name] = sc[name]
+		}
+
+		set.Add(filteredSc)
+	}
+
+	pSet := refSet.Difference(set)
+	mSet := set.Difference(refSet)
+
+	return mSet.List(), pSet.List()
 }

@@ -117,7 +117,7 @@ func graphicsSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"listen": {
 					Type:     schema.TypeString,
-					Required: true,
+					Optional: true,
 				},
 				"port": {
 					Type:     schema.TypeString,
