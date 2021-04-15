@@ -1,7 +1,7 @@
 package opennebula
 
 import (
-	"crypto/sha256"
+	//"crypto/sha256"
 	"fmt"
 	"log"
 	"strconv"
@@ -156,12 +156,12 @@ func resourceOpennebulaUserRead(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(strconv.FormatUint(uint64(user.ID), 10))
 	d.Set("name", user.Name)
-	sum := sha256.Sum256([]byte(d.Get("password").(string)))
-	if fmt.Sprintf("%x", sum) == user.Password {
-		d.Set("password", d.Get("password").(string))
-	} else {
-		return fmt.Errorf("password doesn't match")
-	}
+	//sum := sha256.Sum256([]byte(d.Get("password").(string)))
+	//if fmt.Sprintf("%x", sum) == user.Password {
+	//	d.Set("password", d.Get("password").(string))
+	//} else {
+	//	return fmt.Errorf("password doesn't match")
+	//}
 	d.Set("auth_driver", user.AuthDriver)
 	d.Set("primary_group", user.GID)
 	userGroups := make([]int, 0)
@@ -177,10 +177,10 @@ func resourceOpennebulaUserRead(d *schema.ResourceData, meta interface{}) error 
 			return err
 		}
 	}
-	err = flattenQuotasMapFromStructs(d, &user.QuotasList)
-	if err != nil {
-		return err
-	}
+	//err = flattenQuotasMapFromStructs(d, &user.QuotasList)
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }
